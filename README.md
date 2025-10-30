@@ -45,12 +45,12 @@ dbt test
 
 | Layer | Tool | Purpose |
 |-------|------|----------|
-| **Data Loading** | Manual upload | Data for modeling |
-| **Data Storage & Compute** | Snowflake | Raw and processed data layers |
-| **Transformation** | dbt | Data modeling, testing, documentation |
-| **Exploration & BI** | TBD (Looker / Tableau) | Visualization and semantic layer - To Develop|
-| **Version Control** | GitHub | Collaboration, code review, and CI/CD |
-| **Orchestration** | TBD | Scheduling, alerts, and automation |
+| **Data Loading**           | Manual upload           | Data for modeling |
+| **Data Storage & Compute** | Snowflake              | Raw and processed data layers |
+| **Transformation**         | dbt                    | Data modeling, testing, documentation |
+| **Exploration & BI**       | TBD (Looker / Tableau) | Visualization and semantic layer - To Develop|
+| **Version Control**        | GitHub                 | Collaboration, code review, and CI/CD |
+| **Orchestration**          | TBD                    | Scheduling, alerts, and automation |
 
 ---
 
@@ -58,7 +58,7 @@ dbt test
 
 The data model follows a **dimensional architecture** with three primary layers: **staging, dimension & fact, mart**.
 
-### 🧱 Core Layers
+###  Core Layers
 
 | Layer | Purpose | Example Models |
 |--------|----------|----------------|
@@ -69,7 +69,7 @@ The data model follows a **dimensional architecture** with three primary layers:
 
 ---
 
-## 🧠 Design Highlights
+##  Design Highlights
 
 - **Timezone-standardized trips:**  
   All timestamps are converted to UTC using IANA city mappings (`dim_timezone`) for accurate cross-region comparisons.
@@ -85,7 +85,7 @@ The data model follows a **dimensional architecture** with three primary layers:
 
 ---
 
-### 🛠️ Ideal CI/CD Stack
+###  Ideal CI/CD Stack
 
 - **Airflow:** Orchestration of dbt runs, data loads, alerts, and scheduling  
 - **dbt Cloud:** Development, documentation, and testing  
@@ -95,7 +95,7 @@ The data model follows a **dimensional architecture** with three primary layers:
 - **BI Layer (Looker / Tableau)
 - ** Develop Semenatic Layer in DBT or Looker + Incremental Models
 
-### 🛠️ How would your answer differ in the real world use case where resources are limited and perfect tooling might not be available? 
+###  How would your answer differ in the real world use case where resources are limited and perfect tooling might not be available? 
 -- ** use dbt cloud for automation and CI/CD / or event just snowflake DBT
 -- ** Snowfalke as data storage and integration tool + dashboard in streamlit
 -- ** github for version control
@@ -104,7 +104,6 @@ The data model follows a **dimensional architecture** with three primary layers:
 
 ---
 
-## Future Enhancements
 
 ### Model Descriptions
 
@@ -155,10 +154,6 @@ The data model follows a **dimensional architecture** with three primary layers:
 - Aggregates by route (origin × destination)  
 - Tracks trips, passengers, revenue, and profitability  
 
-
-#### `rpt_revenue_by_day_city`
-- Daily revenue breakdown by city of origin/destination  
-- Enables geographic trend analysis  
 
 #### `mart_air_boltic_detailed`
 - Wide, denormalized mart joining all key dimensions and facts  
