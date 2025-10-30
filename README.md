@@ -1,147 +1,177 @@
- ✈️ Air Boltic Analytics & Reporting (Case Study)
+# Air Boltic Analytics & Reporting (Case Study)
 
-This repository contains the **data modeling and reporting layer** designed for the *Air Boltic* case study — a fictional extension of Bolt’s mobility ecosystem into private and shared airplane rides.  
+This repository contains the **data modeling and reporting layer** designed for the *Air Boltic* case study — a fictional extension of Bolt’s mobility ecosystem into private and shared airplane rides.
 
-The goal of this project is to demonstrate **end-to-end analytical modeling and reporting design** using industry best practices with **dbt + Snowflake + Looker**, while addressing the strategic objectives outlined in the case study.
+The goal of this project is to demonstrate **end-to-end analytical modeling and reporting design** using industry best practices with **dbt + Snowflake **, while addressing the strategic objectives outlined in the case study.
 
-## 🧩 Tech Stack
+---
+
+## How to deploy project on local computer
+
+
+```bash
+# 1. Clone the repository
+git clone [https://github.com/adekpl/sumup-reporting.git](https://github.com/adekpl/bolt_reporting.git)
+cd sumup-reporting
+
+# 2. Install dbt for Snowflake
+pip install dbt-snowflake
+
+
+In your ~/.dbt/profiles.yml, configure the Snowflake connection:
+
+bolt_project:
+  outputs:
+    dev:
+      account: ivqzzhs-ea23082
+      database: bolt
+      password: Bolt123Bolt123
+      role: accountadmin
+      schema: reporting
+      threads: 2
+      type: snowflake
+      user: bolt
+      warehouse: compute_wh
+  target: dev
+
+Move to your dbt project folder:
+
+cd bolt_project
+dbt run
+dbt test
+
+
+## Tech Stack
 
 | Layer | Tool | Purpose |
 |-------|------|----------|
-| **Data Loaind | manual upload of csv files |
-| **Data storage & Computer** | Snowfalke | Raw file and JSON ingestion |
+| **Data Loading** | Manual upload | Data for modeling |
+| **Data Storage & Compute** | Snowflake | Raw and processed data layers |
 | **Transformation** | dbt | Data modeling, testing, documentation |
-| **Exploration & BI** | TBD |  |
-| **Version Control** | GitHub | Collaboration and CI/CD |
+| **Exploration & BI** | TBD (Looker / Tableau) | Visualization and semantic layer - To Develop|
+| **Version Control** | GitHub | Collaboration, code review, and CI/CD |
+| **Orchestration** | TBD | Scheduling, alerts, and automation |
 
-## 🏗️ Data Model Overview
+---
 
-The data model follows a **standard dimensional architecture** with **staging, dimension, fact, and mart** layers:
+## Data Model Overview
+
+The data model follows a **dimensional architecture** with three primary layers: **staging, dimension & fact, mart**.
 
 ### 🧱 Core Layers
 
 | Layer | Purpose | Example Models |
 |--------|----------|----------------|
-| **staging (stg_)** | Standardize raw data from S3/Databricks sources |
-| **dimensions (dim_)** | Reference data for consistent lookups |
-| **facts (fact_)** | Transaction-level business events  |
-| **marts (mart_)** | Analytical aggregations for reporting  |
+| **staging (stg_)** | Standardizes raw data from CSV/JSON uploads or external sources | `stg_aeroplane_model` |
+| **dimensions (dim_)** | Provides reference and lookup tables for consistent joins | `dim_customer`, `dim_aeroplane_model` |
+| **facts (fact_)** | Captures transactional or event-level data | `fact_orders`, `fact_revenue` |
+| **marts (mart_)** | Pre-aggregated and aggregated analytical datasets for BI & dashboards | `raport_daily_kpis`, `mart_air_boltic_detailed` |
 
 ---
 
 ## 🧠 Design Highlights
 
 - **Timezone-standardized trips:**  
-  All timestamps are converted to UTC using IANA city mappings (`dim_timezone`) for accurate cross-region comparisons.  
+  All timestamps are converted to UTC using IANA city mappings (`dim_timezone`) for accurate cross-region comparisons.
 
 - **Data quality built-in:**  
-  `trip_duration_quality_flag` ensures valid durations and identifies timezone anomalies automatically.  
+  The `trip_duration_quality_flag` identifies invalid or suspicious durations automatically.
 
-- **Modular, reusable models:**  
-  Each transformation layer builds logically from the previous one for maintainability and clarity.  
+- **Modular & reusable:**  
+  Each model builds logically from the previous layer, ensuring maintainability and clarity.
 
 - **Rich documentation:**  
-  Every model includes a `.yml` file with detailed column-level documentation and data tests.  
+  Every model has a `.yml` file with column-level documentation and tests to ensure consistency and trust.
 
 ---
 
-## ⚙️ CI/CD & Development Process
+### 🛠️ Ideal CI/CD Stack
 
-In a real-world setup, this project would be deployed using a **multi-environment CI/CD workflow**:
+- **Airflow:** Orchestration of dbt runs, data loads, alerts, and scheduling  
+- **dbt Cloud:** Development, documentation, and testing  
+- **Fivetran:** Automated data ingestion from external systems  
+- **Snowflake:** Scalable compute and storage for analytical processing  
+- **GitHub:** Version control, PR-based reviews, and CI automation  , Development and Production environment
+- **BI Layer (Looker / Tableau)
+- ** Develop Semenatic Layer in DBT or Looker + Incremental Models
 
-| Environment | Purpose |
-Tools:
-Airflow: For orchestration & automation of  DBT Run, alerts. Data Load, Alerting
-DBT: For data modeling, testing
-GitHub: For CI/CD and version control
-Fivetran: For Data Load
-Semenatic Layer: Developed in DBT Cloud or BI Solution  like Tableau/Looker
+### 🛠️ How would your answer differ in the real world use case where resources are limited and perfect tooling might not be available? 
+-- ** use dbt cloud for automation and CI/CD / or event just snowflake DBT
+-- ** Snowfalke as data storage and integration tool + dashboard in streamlit
+-- ** github for version control
+-- ** Gsheet as reporting tool connected to Snowflake
+-- ** Maybe fivetran as loading tool -- depend from budghet
 
-## 🚀 Future Enhancements
+---
 
-🧱 Model Descriptions
-stg_aeroplane_model
+## Future Enhancements
 
-Cleans and standardizes the raw aeroplane_model.json file.
-Extracts key fields such as manufacturer, model, maximum seats, weight, distance, and engine type.
-Acts as the canonical source for aircraft specifications.
+### Model Descriptions
 
-dim_aeroplane_model
+#### `stg_aeroplane_model`
+- Cleans and standardizes the raw `aeroplane_model.json`
+- Extracts manufacturer, model, seat capacity, distance, weight, and engine type  
+- Serves as the canonical aircraft model source  
 
-Dimension table describing every aircraft model available in the Air Boltic system.
-Adds seat and distance category buckets (e.g. “1–10”, “201+”) for easy segmentation and joins to trip and utilization reports.
+#### `dim_aeroplane_model`
+- Dimension table describing each aircraft model  
+- Adds seat and distance categories (e.g., “1–10”, “201+”) for segmentation  
+- Joins to trip and utilization reports  
 
-dim_customer_group
+#### `dim_customer_group`
+- Defines customer group categories (Company, Organisation, Private Group, etc.)  
+- Includes a fallback “no data” row for full categorization  
 
-Static reference table defining customer groups (Company, Organisation, Private Group, etc.).
-Includes a “no data” fallback row to ensure all orders are categorized, even when customer group information is missing.
+#### `dim_customer`
+- Contains customer-level information (name, email, phone, group)  
+- Ensures referential integrity with `dim_customer_group`  
 
-dim_customer
+#### `dim_timezone`
+- Maps all supported cities to their IANA time-zone identifiers  
+- Enables UTC conversion for all trip timestamps  
 
-Holds all customer-level information: name, email, phone number, and associated customer group.
-Ensures referential integrity with dim_customer_group and provides clean keys for analytics.
+#### `dim_trip`
+- Represents individual flights on the Air Boltic platform  
+- Adds UTC timestamps and calculated durations  
+- Includes `trip_duration_quality_flag` (VALID, INVALID, SUSPICIOUS)  
 
-dim_timezone
+#### `fact_orders`
+- Transactional booking data: `order_id`, `trip_id`, `customer_id`, seat, price, status  
+- Core fact table for revenue and passenger analytics  
 
-Maps all supported cities to their IANA time-zone identifiers (e.g. Europe/Paris, America/New_York).
-Used to convert local flight departure and arrival timestamps into UTC for consistent duration calculations.
+#### `fact_passengers_on_trip`
+- Identifies each passenger-seat-trip combination  
+- Supports occupancy and seat-level behavior analysis  
 
-dim_trip
+#### `fact_revenue`
+- Aggregates recognized revenue per day (UTC) after completed trips  
+- Used for financial and executive reporting  
 
-Represents each individual flight (trip) offered on the Air Boltic marketplace.
-Enriches trips with origin/destination time-zones, UTC-converted timestamps, and a calculated flight duration.
-Includes a quality flag (VALID, INVALID, SUSPICIOUS) to catch time-zone or data-entry issues.
+#### `report_daily_kpis`
+- Daily Air Boltic summary: active users, trips, revenue, avg ticket, cancellations  
+- Core for Executive KPI dashboards  
 
-fact_orders
+#### `report_route_performance`
+- Aggregates by route (origin × destination)  
+- Tracks trips, passengers, revenue, and profitability  
 
-Transactional fact table of all seat bookings.
-Captures order_id, trip_id, customer_id, seat number, price in EUR, and booking status.
-Forms the core revenue and passenger activity dataset.
 
-fact_passengers_on_trip
+#### `rpt_revenue_by_day_city`
+- Daily revenue breakdown by city of origin/destination  
+- Enables geographic trend analysis  
 
-Intermediate fact table that uniquely identifies each passenger-seat-trip combination (passenger_id).
-Used to analyze passenger counts, occupancy, and seat-level behaviors.
+#### `mart_air_boltic_detailed`
+- Wide, denormalized mart joining all key dimensions and facts  
+- Basis for ad-hoc queries and Looker dashboards  
 
-fact_revenue
+---
 
-Aggregates recognized revenue per reporting date (UTC) once flights are completed.
-Used for financial and executive reporting aligned with accounting standards.
+## 🔮 Next Steps
 
-rpt_daily_kpis
+1. Implement **incremental materializations** for large fact tables (optimized daily loads).  
+2. Finalize and connect the **BI tool** (Looker / Tableau) for executive dashboards.  
+3. Add **dbt snapshots** for slowly changing dimensions (SCD Type 2).  
+4. Integrate **Airflow orchestration** for production-grade automation and alerting.  
+5. Add **data lineage visualization** via dbt docs or Monte Carlo.  
 
-Daily summary of Air Boltic performance.
-Shows key metrics such as active users, completed trips, total revenue, average ticket price, and cancellation rate.
-Main input for the Executive KPI Dashboard.
-
-rpt_route_performance
-
-Aggregates performance by route (origin × destination) and reporting date.
-Measures total trips, passengers, revenue, and average ticket prices to track route profitability.
-
-rpt_customer_segments
-
-Summarizes customer behavior and revenue by customer group type.
-Helps identify which market segments generate the most bookings and highest average spend.
-
-rpt_aircraft_utilization
-
-Analyzes operational efficiency per aircraft and model.
-Includes total and average flight hours, trip counts, and utilization per day.
-Crucial for fleet planning and performance monitoring.
-
-rpt_revenue_by_day_city
-
-Daily revenue breakdown by origin and destination city.
-Supports geographic revenue distribution and regional trend analysis.
-
-mart_air_boltic_detailed
-
-A wide analytical mart joining all dimensions and facts into a single, denormalized dataset.
-Each row represents one order enriched with customer, flight, aircraft, and revenue attributes.
-Serves as the foundation for ad-hoc queries and Looker self-service dashboards.
-
-If additional time were available, next steps would include:
-1. **Incremental materializations** for large fact tables (optimized daily loads).  
-2. Choose BI Tool solution for reporting
 
