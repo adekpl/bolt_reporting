@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: fact_revenue
+    description: >
+      Aggregated fact table that calculates total revenue in EUR per UTC-based 
+      reporting date. Revenue is recognized after the flight has concluded 
+      (based on the `end_timestamp_utc` of each trip). This model joins 
+      `fact_orders` with `dim_trip` to align orders with the correct flight end date.
+
+    columns:
+      - name: reporting_date
+        description: >
+          The UTC date when the trip ended. Used as the standardized reporting date 
+          for revenue recognition. Represents when revenue is realized, 
+          not when the booking was made.
+        tests:
+          - not_null
+          - unique
+
+      - name: total_revenue_in_eur
+        description: >
+          Total aggregated revenue (in EUR) for all trips completed on the reporting date.
+          Calculated as the sum of `price_eur` from `fact_orders`.
+
+    meta:
+      owner: data_engineering
+      refresh_frequency: daily
+      tags: ['fact', 'revenue', 'finance', 'aggregation']

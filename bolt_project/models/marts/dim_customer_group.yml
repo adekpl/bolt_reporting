@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: dim_customer_group
+    description: >
+      Dimension table containing all customer groups from the raw source, 
+      plus an additional "no data" fallback record (ID = 0) to handle missing 
+      or undefined customer group references in other tables. 
+      Each group represents a company, organization, or private customer set.
+
+    columns:
+      - name: customer_group_id
+        description: >
+          Unique identifier for the customer group. 
+          The record with ID = 0 is a placeholder used when customer data 
+          does not reference a valid group.
+        tests:
+          - not_null
+          - unique
+
+      - name: type
+        description: >
+          Type of the group (e.g. Company, Organisation, Private Group, etc.).
+        tests:
+          - accepted_values:
+              values: ['Company', 'Organisation', 'Private Group', 'no data']
+
+      - name: name
+        description: >
+          Name of the customer group (e.g. Bolt, BigBang, Mari's friends, etc.).
+          For the placeholder row, this value is "no data".
+
+      - name: registry_number
+        description: >
+          Registry or tax identification number for the group, when available.
+          May be NULL for informal or private groups.
+
+    meta:
+      owner: data_engineering
+      refresh_frequency: daily
+      tags: ['dimension', 'customer', 'reference']

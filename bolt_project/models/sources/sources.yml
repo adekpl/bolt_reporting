@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: bolt_raw_data
+    database: bolt
+    schema: raw_data
+    tables:
+      - name: aeroplane_model
+      - name: trip
+      - name: orders
+      - name: customer_group
+      - name: customer
+      - name: aeroplane 

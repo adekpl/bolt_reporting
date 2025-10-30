@@ -1,0 +1,90 @@
+version: 2
+
+models:
+  - name: dim_trip
+    description: >
+      Dimension table containing enriched flight trip information with standardized
+      UTC timestamps and calculated trip durations. This model joins the raw trip data
+      with the `dim_timezones` reference to accurately convert local departure and arrival
+      times into UTC and to classify duration quality for data validation.
+
+    columns:
+      - name: trip_id
+        description: >
+          Unique identifier of the trip record from the source data.
+        tests:
+          - not_null
+          - unique
+
+      - name: origin_city
+        description: >
+          City where the flight originates. Joined with `dim_timezones.city` to determine
+          the local time zone used for UTC conversion.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_timezones')
+              field: city
+
+      - name: origin_city_timezone
+        description: >
+          IANA timezone of the origin city (e.g. 'America/Los_Angeles').
+
+      - name: destination_city
+        description: >
+          City where the flight arrives. Joined with `dim_timezones.city` to determine
+          the local time zone used for UTC conversion.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_timezones')
+              field: city
+
+      - name: destination_city_timezone
+        description: >
+          IANA timezone of the destination city (e.g. 'Australia/Sydney').
+
+      - name: airplane_id
+        description: >
+          Foreign key linking to the aircraft used for this trip. References the airplane
+          dimension table (e.g. `dim_aeroplane`).
+
+      - name: start_timestamp
+        description: >
+          Original local start timestamp in the origin city's local time zone.
+
+      - name: end_timestamp
+        description: >
+          Original local end timestamp in the destination city's local time zone.
+
+      - name: start_timestamp_utc
+        description: >
+          Departure time converted to UTC for standardization across regions.
+
+      - name: end_timestamp_utc
+        description: >
+          Arrival time converted to UTC for standardization across regions.
+
+      - name: trip_duration_in_minutes
+        description: >
+          Calculated trip duration in minutes, adjusted for time zone differences.
+          If the arrival UTC time is earlier than the departure UTC time (crossing
+          the International Date Line), one day is added to the arrival time to compute
+          the correct duration.
+        tests:
+          - not_null
+
+      - name: trip_duration_quality_flag
+        description: >
+          Quality indicator flagging the validity of the trip duration:
+          - VALID → duration within normal range
+          - INVALID → duration shorter than 15 minutes
+          - SUSPICIOUS → duration longer than 24 hours
+        tests:
+          - accepted_values:
+              values: ['VALID','INVALID','SUSPICIOUS']
+
+    meta:
+      owner: data_engineering
+      refresh_frequency: daily
+      tags: ['dimension', 'trip', 'timezone', 'quality', 'aviation']

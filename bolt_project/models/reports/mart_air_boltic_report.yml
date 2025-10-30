@@ -1,0 +1,167 @@
+version: 2
+
+models:
+  - name: mart_air_boltic_detailed
+    description: >
+      Comprehensive reporting mart for Air Boltic combining customer, trip, aircraft, 
+      and order data into a single wide table for end-to-end analysis.  
+      Each record represents an individual order (seat booking) enriched with 
+      flight details, aircraft specifications, and customer segment information.  
+      This model powers detailed revenue, route, and operational dashboards.
+
+    columns:
+      - name: reporting_date
+        description: >
+          UTC date of the flight departure, used as the reporting and aggregation date.
+        tests:
+          - not_null
+
+      - name: order_id
+        description: >
+          Unique identifier for each order (seat booking) in the system.
+        tests:
+          - not_null
+          - unique
+
+      - name: trip_id
+        description: >
+          Unique identifier of the trip associated with the order.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_trip')
+              field: trip_id
+
+      - name: customer_id
+        description: >
+          Unique identifier of the customer who placed the order.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_id
+
+      - name: customer_name
+        description: >
+          Full name of the customer as recorded in the customer dimension.
+
+      - name: customer_email
+        description: >
+          Email address of the customer used for notifications and communications.
+
+      - name: customer_phone
+        description: >
+          Phone number of the customer, useful for contact or region-based analysis.
+
+      - name: customer_group_type
+        description: >
+          Type of customer group (e.g. Company, Organisation, Private Group, or 'no data').
+
+      - name: customer_group_name
+        description: >
+          Name of the customer group or organization the customer belongs to.
+
+      - name: origin_city
+        description: >
+          City where the flight departs from.
+
+      - name: destination_city
+        description: >
+          City where the flight arrives.
+
+      - name: origin_city_timezone
+        description: >
+          IANA timezone of the origin city.
+
+      - name: destination_city_timezone
+        description: >
+          IANA timezone of the destination city.
+
+      - name: start_timestamp
+        description: >
+          Local start time of the trip in the origin city timezone.
+
+      - name: end_timestamp
+        description: >
+          Local end time of the trip in the destination city timezone.
+
+      - name: start_timestamp_utc
+        description: >
+          Standardized UTC start timestamp of the trip.
+
+      - name: end_timestamp_utc
+        description: >
+          Standardized UTC end timestamp of the trip.
+
+      - name: trip_duration_in_minutes
+        description: >
+          Duration of the trip in minutes, adjusted for timezone differences.
+
+      - name: trip_duration_quality_flag
+        description: >
+          Quality indicator for trip duration calculation.
+          - VALID: within expected duration range
+          - INVALID: too short (<15 minutes)
+          - SUSPICIOUS: too long (>24 hours)
+        tests:
+          - accepted_values:
+              values: ['VALID', 'INVALID', 'SUSPICIOUS']
+
+      - name: airplane_id
+        description: >
+          Unique identifier for the aircraft operating the trip.
+        tests:
+          - relationships:
+              to: ref('dim_aeroplane_model')
+              field: aeroplane_model_id
+
+      - name: manufacturer
+        description: >
+          Aircraft manufacturer name (e.g. Cessna, Airbus, Boeing).
+
+      - name: airplane_model
+        description: >
+          Aircraft model designation (e.g. A320, Citation XLS).
+
+      - name: max_seats
+        description: >
+          Maximum passenger capacity of the aircraft.
+
+      - name: max_seats_category
+        description: >
+          Seat capacity category (e.g. '1–10', '101–200', '201+') for analytical grouping.
+
+      - name: max_distance
+        description: >
+          Maximum operational flight distance (km) of the aircraft model.
+
+      - name: max_distance_category
+        description: >
+          Distance capability category used for route segmentation.
+
+      - name: engine_type
+        description: >
+          Type of engine configuration (e.g. Jet, Turboprop, Piston).
+
+      - name: price_eur
+        description: >
+          Ticket price for the individual seat in euros.
+
+      - name: order_status
+        description: >
+          Current status of the order (Booked, Cancelled, Finished, etc.).
+        tests:
+          - accepted_values:
+              values: ['Booked', 'Cancelled', 'Finished']
+
+      - name: data_quality_note
+        description: >
+          Textual indicator summarizing trip data quality.
+          - OK → consistent data  
+          - Check duration → suspiciously short trip  
+          - Check timezone/date → potential timezone misalignment
+
+    meta:
+      owner: analytics_engineering
+      refresh_frequency: daily
+      tags: ['mart', 'report', 'analytics', 'air_boltic', 'wide_table']

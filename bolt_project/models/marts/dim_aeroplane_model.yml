@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: dim_aeroplane_model
+    description: >
+      Dimension table providing categorized aircraft model data. 
+      Each record represents a unique combination of manufacturer and model, 
+      enriched with seat capacity, distance range, and weight categories 
+      derived from the staging model `stg_aeroplane_model`.
+
+    columns:
+      - name: manufacturer
+        description: manufacturer of airplance
+      - name: aeroplane_model_id
+        description: >
+          SHA2 hash combining manufacturer and model to create a unique,
+          deterministic surrogate key for each aircraft model.
+        tests:
+          - not_null
+          - unique
+
+      - name: model
+        description: Name of the aircraft model (e.g. A320neo, 737-800).
+        tests:
+          - not_null
+
+      - name: max_seats
+        description: Maximum passenger seating capacity for this model.
+
+      - name: max_seats_category
+        description: >
+          Seat capacity category bucket. Ranges: 
+          1-10 (private jet), 11-20 (business jet), 
+          21-100 (regional), 101-200 (narrow-body commercial), 
+          201+ (wide-body or long-haul).
+        tests:
+          - accepted_values:
+              values: ['1-10','11-20','21-100','101-200','201+']
+
+      - name: max_weight
+        description: >
+          Maximum takeoff weight of the aircraft model, in kilograms.
+
+      - name: max_distance
+        description: >
+          Maximum flight range of the aircraft model, in nautical miles or kilometers (depending on source).
+        
+      - name: max_distance_category
+        description: >
+          Range category bucket grouping aircraft by operational distance capability.
+        tests:
+          - accepted_values:
+              values: ['1-2000','2001-3000','3001-4000','4001-6000','6000+']
+
+      - name: engine_type
+        description: Engine type used by this model (e.g. GE90-115B, CFM LEAP-1A).
+
+    meta:
+      owner: data_engineering
+      refresh_frequency: daily
+      tags: ['dimension', 'aircraft', 'aviation']

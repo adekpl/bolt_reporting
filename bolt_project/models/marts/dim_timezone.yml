@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: dim_timezone
+    description: >
+      Static dimension mapping cities to their respective IANA time zone identifiers. 
+      Used to convert local timestamps (departure and arrival times) 
+      to UTC within the flight and trip models. 
+      This model ensures consistent timezone handling for all cities in the dataset.
+
+    columns:
+      - name: city
+        description: >
+          City name as used in trip or flight tables. 
+          Serves as the natural key for joining with origin and destination city fields.
+        tests:
+          - not_null
+          - unique
+
+      - name: iana_tz
+        description: >
+          Official IANA time zone identifier corresponding to the city. 
+          Examples include 'America/New_York', 'Europe/Paris', and 'Asia/Tokyo'. 
+          Used in Snowflake’s `CONVERT_TIMEZONE` function for accurate UTC conversion.
+        tests:
+          - not_null
+
+    meta:
+      owner: data_engineering
+      refresh_frequency: static
+      tags: ['dimension', 'timezone', 'reference', 'static']

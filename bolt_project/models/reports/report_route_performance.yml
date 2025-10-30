@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: report_route_performance
+    description: >
+      Route-level performance and revenue aggregation for Air Boltic.
+      Each record represents a unique (reporting_date, origin_city, destination_city) combination 
+      enriched with total trips, passenger counts, and revenue metrics.
+      This model supports dashboards tracking route profitability, demand trends, 
+      and city-pair performance over time.
+
+    columns:
+      - name: reporting_date
+        description: >
+          UTC date on which the trips ended or revenue was recognized.
+          Used as the aggregation key for daily reporting.
+        tests:
+          - not_null
+
+      - name: origin_city
+        description: >
+          City where the flight originated. 
+          Joins to `dim_trip.origin_city` for reference.
+        tests:
+          - not_null
+
+      - name: destination_city
+        description: >

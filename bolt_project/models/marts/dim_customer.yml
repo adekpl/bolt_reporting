@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: dim_customer
+    description: >
+      Dimension table of all individual customers. 
+      Each record includes full name, contact details, and an associated customer group. 
+      Customers without an assigned group are linked to the "no data" record (ID = 0) 
+      from `dim_customer_group` for referential consistency.
+
+    columns:
+      - name: customer_id
+        description: >
+          Unique identifier for each customer record from the raw source.
+        tests:
+          - not_null
+          - unique
+
+      - name: full_name
+        description: >
+          Full customer name as recorded in the source data.
+
+      - name: email
+        description: >
+          Customer email address. Used for communication and identification.
+
+      - name: customer_group_id
+        description: >
+          Foreign key linking to `dim_customer_group.customer_group_id`. 
+          Defaults to 0 when no valid customer group is assigned.
+        tests:
+          - relationships:
+              to: ref('dim_customer_group')
+              field: customer_group_id
+
+      - name: phone_number
+        description: >
+          Contact phone number of the customer, if available.
+
+    meta:
+      owner: data_engineering
+      refresh_frequency: daily
+      tags: ['dimension', 'customer', 'reference']

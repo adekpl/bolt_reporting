@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: fact_passengers_on_trip
+    description: >
+      Fact table capturing passenger-level participation on each trip.
+      Each record represents a unique passenger-seat assignment for a given trip,
+      derived from the `orders` source. The model generates a deterministic
+      `passenger_id` hash to uniquely identify each passenger-trip-seat combination.
+
+    columns:
+      - name: passenger_id
+        description: >
+          Deterministic SHA2 hash combining `customer_id`, `seat_no`, and `trip_id`
+          to ensure unique identification of a passenger on a specific trip and seat.
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: >
+          Foreign key referencing the customer who made the booking.
+          Links to `dim_customer.customer_id`.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_id
+
+      - name: trip_id
+        description: >
+          Foreign key referencing the associated trip.
+          Links to `dim_trip.trip_id`.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_trip')
+              field: trip_id
+
+      - name: seat_no
+        description: >
+          Seat number assigned to the passenger for that specific trip.
+
+      - name: passanger_status
+        description: >
+          Booking or travel status of the passenger for the trip.
+          Typical values include 'Booked', 'Cancelled', or 'Finished'.
+        tests:
+          - accepted_values:
+              values: ['Booked', 'Cancelled', 'Finished']
+
+    meta:
+      owner: data_engineering
+      refresh_frequency: daily
+      tags: ['fact', 'passenger', 'trip', 'aviation']
