@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: report_daily_kpis
+    description: >
+      Daily KPI summary table for the Air Boltic marketplace. 
+      Aggregates revenue, active users, completed trips, and cancellation rates 
+      by UTC date to provide an executive-level performance snapshot.
+      Serves as the main source for daily trend dashboards in Looker.
+
+    columns:
+      - name: reporting_date
+        description: >
+          UTC date on which the trip ended (revenue recognized and KPIs measured).
+        tests:
+          - not_null
+          - unique
+
+      - name: daily_active_users
+        description: >
+          Count of distinct customers who booked or completed at least one flight on the reporting date.
+
+      - name: completed_trips
+        description: >
+          Number of unique trips completed (trip records with valid duration and status).
+
+      - name: total_revenue_eur
+        description: >
+          Total revenue in euros recognized on the reporting date.
+
+      - name: cancellation_rate_pct
+        description: >
+          Percentage of bookings cancelled on that date, computed as 
+          cancelled_orders / total_orders * 100.
+
+      - name: valid_trip_ratio_pct
+        description: >
+          Percentage of trips flagged as VALID in `dim_trip.trip_duration_quality_flag`, 
+          used for data quality monitoring.
+
+    meta:
+      owner: data_analytics
+      refresh_frequency: daily
+      tags: ['report', 'kpi', 'executive', 'daily']

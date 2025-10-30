@@ -9,7 +9,7 @@ dim_customer as ( select * from {{ ref('dim_customer') }})
 select
     date_trunc('day', t.start_timestamp_utc) as reporting_date,
     count(distinct c.customer_id) as daily_active_users,
-    count(distinct t.trip_id) as dail_distinct_trips,
+    count(distinct t.trip_id) as daily_distinct_trips,
     count(order_id) as daily_orders,
     sum(o.price_eur) as total_revenue_eur,
     --avg(o.price_eur) as avg_ticket_price_eur,
